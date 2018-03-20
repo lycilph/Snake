@@ -1,39 +1,39 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace LyCilph.States
 {
-    public class MainMenuState : GameElement
+    public class MainMenuState : StateEntity
     {
         private SpriteFont header_font;
         private SpriteFont font;
-        private float text_start;
 
-        public MainMenuState(SnakeGame game) : base(game) { }
+        public MainMenuState(StateManager state_manager) : base(state_manager) { }
 
-        public override void LoadContent()
+        public override void LoadContent(ContentManager content)
         {
-            header_font = game.Content.Load<SpriteFont>("header_font");
-            font = game.Content.Load<SpriteFont>("font");
-
-            var header_size = header_font.MeasureString("Snake");
-            text_start = (game.ScreenWidth - header_size.X) / 2;
+            header_font = content.Load<SpriteFont>("header_font");
+            font = content.Load<SpriteFont>("font");
         }
 
-        public override void UpdateInput(KeyboardState new_state, KeyboardState old_state)
+        public override void HandleInput(InputManager input)
         {
-            if (old_state.IsKeyUp(Keys.D1) && new_state.IsKeyDown(Keys.D1))
-                game.TransitionToGameState();
+            if (input.IsPressed(Keys.D1))
+                state_manager.TransitionToGameState();
         }
 
         public override void Draw(SpriteBatch sprite_batch)
         {
-            sprite_batch.DrawString(header_font, "Snake", new Vector2(text_start, 220), Color.Black);
-            sprite_batch.DrawString(font, "(1) Player Game", new Vector2(text_start, 270), Color.Black);
-            sprite_batch.DrawString(font, "(2) Simple AI Game", new Vector2(text_start, 290), Color.Black);
-            sprite_batch.DrawString(font, "(3) Neural Network AI Game", new Vector2(text_start, 310), Color.Black);
-            sprite_batch.DrawString(font, "(Esc) Quit", new Vector2(text_start, 330), Color.Black);
+            var text_size = font.MeasureString("(3) Neural Network");
+            var x = (Settings.screen_width - text_size.X) / 2;
+
+            sprite_batch.DrawString(header_font, "Snake", new Vector2(x, 200), Color.Black);
+            sprite_batch.DrawString(font, "(1) Player", new Vector2(x, 250), Color.Black);
+            sprite_batch.DrawString(font, "(2) Simple AI", new Vector2(x, 270), Color.Black);
+            sprite_batch.DrawString(font, "(3) Neural Network", new Vector2(x, 290), Color.Black);
+            sprite_batch.DrawString(font, "(Esc) Quit", new Vector2(x, 310), Color.Black);
         }
     }
 }

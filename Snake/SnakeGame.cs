@@ -1,5 +1,4 @@
-﻿using LyCilph.Elements;
-using LyCilph.States;
+﻿using LyCilph.States;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -11,30 +10,16 @@ namespace LyCilph
     {
         private GraphicsDeviceManager graphics;
         private SpriteBatch sprite_batch;
-        private KeyboardState new_state, old_state;
-
-        private int text_area_width = 400;
-
-        private MainMenuState main_menu_state;
-        private GameState game_state;
-        private GameElement current_state;
-        private GameElement debug;
-
-        public Settings Settings { get; private set; }
-        public int ScreenWidth { get { return graphics.PreferredBackBufferWidth; } }
-        public int ScreenHeight { get { return graphics.PreferredBackBufferHeight; } }
-        public int TextAreaStart { get { return Settings.Size * Settings.CellSize + Margin * 2; } }
-        public int Margin { get; private set; } = 10;
+        private InputManager input_manager;
+        private StateManager state_manager;
 
         public SnakeGame()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            Settings = Settings.Load();
-
-            graphics.PreferredBackBufferWidth = Settings.Size * Settings.CellSize + Margin * 2 + text_area_width;
-            graphics.PreferredBackBufferHeight = Settings.Size * Settings.CellSize + Margin * 2;
+            graphics.PreferredBackBufferWidth = Settings.screen_width;
+            graphics.PreferredBackBufferHeight = Settings.screen_height;
             graphics.SynchronizeWithVerticalRetrace = false;
             graphics.ApplyChanges();
 
@@ -49,11 +34,10 @@ namespace LyCilph
         /// </summary>
         protected override void Initialize()
         {
-            main_menu_state = new MainMenuState(this);
-            game_state = new GameState(this);
-            current_state = main_menu_state;
-
-            debug = new Debug(this);
+            input_manager = new InputManager();
+            state_manager = new StateManager(GraphicsDevice);
+            
+            state_manager.TransitionToMainMenuState();
 
             base.Initialize();
         }
@@ -64,12 +48,9 @@ namespace LyCilph
         /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
             sprite_batch = new SpriteBatch(GraphicsDevice);
 
-            main_menu_state.LoadContent();
-            game_state.LoadContent();
-            debug.LoadContent();
+            state_manager.LoadContent(Content);
         }
 
         /// <summary>
@@ -81,55 +62,32 @@ namespace LyCilph
             // TODO: Unload any non ContentManager content here
         }
 
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="game_time">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime game_time)
         {
-            // Poll for current keyboard state
-            new_state = Keyboard.GetState();
+            input_manager.Begin();
 
-            // If they hit esc, exit
-            if (new_state.IsKeyDown(Keys.Escape))
+            // Handle input
+            if (input_manager.IsPressed(Keys.Escape))
                 Exit();
+            state_manager.CurrentState.HandleInput(input_manager);
 
-            current_state.UpdateInput(new_state, old_state);
-            debug.UpdateInput(new_state, old_state);
+            input_manager.End();
 
-            // Save current keyboard state for next cycle
-            old_state = new_state;
-
-            // Update game logic
-            current_state.UpdateLogic(game_time);
-            debug.UpdateLogic(game_time);
-
+            // Update logic
+            state_manager.CurrentState.Update(game_time);
             base.Update(game_time);
         }
 
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Draw(GameTime gameTime)
+        protected override void Draw(GameTime game_time)
         {
             GraphicsDevice.Clear(Color.White);
 
             sprite_batch.Begin();
 
-            current_state.Draw(sprite_batch);
-            debug.Draw(sprite_batch);
-
-            base.Draw(gameTime);
+            state_manager.CurrentState.Draw(sprite_batch);
+            base.Draw(game_time);
 
             sprite_batch.End();
-
-        }
-
-        public void TransitionToGameState()
-        {
-            current_state = game_state;
         }
     }
 }

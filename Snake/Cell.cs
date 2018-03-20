@@ -1,10 +1,13 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace LyCilph
 {
     [DebuggerDisplay("{X}, {Y}")]
     public class Cell
     {
+        private static Random rnd = new Random((int)DateTime.Now.Ticks);
+
         public int X { get; set; }
         public int Y { get; set; }
 
@@ -14,6 +17,12 @@ namespace LyCilph
         {
             X = x;
             Y = y;
+        }
+
+        public void Random()
+        {
+            X = rnd.Next(0, Settings.board_size);
+            Y = rnd.Next(0, Settings.board_size);
         }
 
         public Cell Add(int x, int y)

@@ -1,72 +1,67 @@
-﻿using LyCilph.Elements;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System;
+using System.Linq;
 
 namespace LyCilph.States
 {
-    public class GameState : GameElement
+    public class GameState : StateEntity
     {
+        private Texture2D point;
+        private Texture2D circle;
         private SpriteFont font;
 
-        private double fps;
-        private double interval;
-        private double delta;
+        private Cell food;
+        private Snake snake;
 
-        public Board Board { get; private set; }
-        public Food Food { get; private set; }
-        public Snake Snake { get; private set; }
-
-        public GameState(SnakeGame game) : base(game)
+        public GameState(StateManager state_manager, GraphicsDevice graphics_device) : base(state_manager)
         {
-            Board = new Board(game);
-            Food = new Food(game);
-            Snake = new Snake(game);
+            point = new Texture2D(graphics_device, 1, 1);
+            point.SetData(new Color[] { Color.White });
 
-            interval = game.Settings.IntervalStart;
-            fps = 1000.0 / interval;
+            food = new Cell();
+            snake = new Snake();
         }
 
-        public override void LoadContent()
+        public override void LoadContent(ContentManager content)
         {
-            font = game.Content.Load<SpriteFont>("font");
-
-            Board.LoadContent();
-            Food.LoadContent();
-            Snake.LoadContent();
+            circle = content.Load<Texture2D>("circle");
+            font = content.Load<SpriteFont>("font");
         }
 
-        public override void UpdateInput(KeyboardState new_state, KeyboardState old_state)
+        public override void Reset()
         {
-            if (old_state.IsKeyUp(Keys.Add) && new_state.IsKeyDown(Keys.Add))
-            {
-                interval = Math.Min(game.Settings.IntervalMax, interval + game.Settings.IntervalChange);
-                fps = 1000.0 / interval;
-            }
-
-            if (old_state.IsKeyUp(Keys.Subtract) && new_state.IsKeyDown(Keys.Subtract))
-            {
-                interval = Math.Max(game.Settings.IntervalMin, interval - game.Settings.IntervalChange);
-                fps = 1000.0 / interval;
-            }
+            food.Random();
+            snake.Reset();
         }
 
-        public override void UpdateLogic(GameTime game_time)
+        public override void Update(GameTime game_time)
         {
-            delta += game_time.ElapsedGameTime.TotalMilliseconds;
-            if (delta < interval)
-                return;
-            delta = 0.0;
+            
         }
 
         public override void Draw(SpriteBatch sprite_batch)
         {
-            Board.Draw(sprite_batch);
-            Food.Draw(sprite_batch);
-            Snake.Draw(sprite_batch);
+            var board_size = Settings.board_width;
+            var cell_size = Settings.cell_size;
 
-            sprite_batch.DrawString(font, $"(+/-) fps: {fps:N1}", new Vector2(game.TextAreaStart, game.ScreenHeight - 20 - game.Margin), Color.Black);
+            // Top border
+            sprite_batch.Draw(point, new Rectangle(0, 0, board_size, 1), Color.Blue);
+            // Bottom border
+            sprite_batch.Draw(point, new Rectangle(0, board_size - 1, board_size, 1), Color.Blue);
+            // Left border
+            sprite_batch.Draw(point, new Rectangle(0, 0, 1, board_size), Color.Blue);
+            // Right border
+            sprite_batch.Draw(point, new Rectangle(board_size - 1, 0, 1, board_size), Color.Blue);
+
+            // Food
+            sprite_batch.Draw(circle, new Rectangle(food.X * cell_size, food.Y * cell_size, cell_size, cell_size), Color.Red);
+
+            // Snake head
+            sprite_batch.Draw(circle, new Rectangle(snake.Head.X * cell_size, snake.Head.Y * cell_size, cell_size, cell_size), Color.Black);
+            // Draw body
+            foreach (var body in snake.Body.Skip(1))
+                sprite_batch.Draw(circle, new Rectangle(body.X * cell_size, body.Y * cell_size, cell_size, cell_size), Color.Gray);
         }
     }
 }
