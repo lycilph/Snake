@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE;WINDOWS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -41,19 +42,21 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Cell.cs" />
-    <Compile Include="Direction.cs" />
+    <Compile Include="Elements\Cell.cs" />
+    <Compile Include="States\GameOverState.cs" />
+    <Compile Include="Controllers\ControllerType.cs" />
+    <Compile Include="Utils\Direction.cs" />
     <Compile Include="Controllers\NeuralNetworkController.cs" />
     <Compile Include="Controllers\PlayerController.cs" />
     <Compile Include="Controllers\SimpleAIController.cs" />
-    <Compile Include="Controllers\SnakeController.cs" />
-    <Compile Include="Entity.cs" />
+    <Compile Include="Controllers\Controller.cs" />
     <Compile Include="InputManager.cs" />
-    <Compile Include="Snake.cs" />
+    <Compile Include="Elements\Snake.cs" />
     <Compile Include="States\GameState.cs" />
     <Compile Include="States\MainMenuState.cs" />
-    <Compile Include="States\StateEntity.cs" />
-    <Compile Include="StateManager.cs" />
+    <Compile Include="States\State.cs" />
+    <Compile Include="States\StateManager.cs" />
+    <Compile Include="UpdateManager.cs" />
     <Compile Include="Utils\JsonUtils.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SnakeGame.cs" />
@@ -61,6 +64,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="MathNet.Numerics, Version=4.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MathNet.Numerics.4.4.0\lib\net40\MathNet.Numerics.dll</HintPath>
+    </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MonoGameInstallDirectory)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
     </Reference>
@@ -68,6 +74,11 @@
       <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -78,9 +89,7 @@
     <None Include="app.manifest" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Entities\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

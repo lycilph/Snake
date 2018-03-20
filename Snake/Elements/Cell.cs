@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace LyCilph
+namespace LyCilph.Elements
 {
     [DebuggerDisplay("{X}, {Y}")]
     public class Cell

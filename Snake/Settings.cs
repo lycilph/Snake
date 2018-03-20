@@ -12,15 +12,8 @@
 
         public static int TargetFPS = 200;
 
-        public static int energy_per_food = 250;
+        public static int update_interval = 50;
 
-        //public int Size { get; set; } // Size of the playing area in cells
-        //public int CellSize { get; set; } // Size of the cells in pixels
-        //public int EnergyPerFood { get; set; }
-        //public int TargetFPS { get; set; }
-        //public int IntervalMax { get; set; }
-        //public int IntervalMin { get; set; }
-        //public int IntervalChange { get; set; }
-        //public int IntervalStart { get; set; }
+        public static int energy_per_food = 250;
     }
 }

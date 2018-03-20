@@ -1,4 +1,4 @@
-﻿namespace LyCilph
+﻿namespace LyCilph.Utils
 {
     public static class Direction
     {

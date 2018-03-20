@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using LyCilph.Utils;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace LyCilph
+namespace LyCilph.Elements
 {
     public class Snake
     {
@@ -76,5 +77,25 @@ namespace LyCilph
             Energy--;
         }
 
+        public bool HitSelf()
+        {
+            // Skipping 3 here, as the snake cannot hit it's own head or the first 2 segments
+            foreach (var segment in Body.Skip(3))
+            {
+                if (Head.X == segment.X && Head.Y == segment.Y)
+                    return true;
+            }
+            return false;
+        }
+
+        public bool Hit(Cell c)
+        {
+            foreach (var segment in Body)
+            {
+                if (segment.X == c.X && segment.Y == c.Y)
+                    return true;
+            }
+            return false;
+        }
     }
 }
