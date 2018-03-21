@@ -29,7 +29,7 @@ namespace LyCilph.States
 
         public override void HandleInput(InputManager input)
         {
-            if (input.IsPressed(Keys.C))
+            if (input.IsPressed(Keys.C) || input.IsPressed(Keys.Escape) || input.IsPressed(Keys.Back))
                 state_manager.TransitionToMainMenuState();
         }
 

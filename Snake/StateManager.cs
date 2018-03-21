@@ -1,10 +1,11 @@
 ﻿using LyCilph.Controllers;
 using LyCilph.Elements;
+using LyCilph.States;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace LyCilph.States
+namespace LyCilph
 {
     public class StateManager
     {
@@ -12,13 +13,17 @@ namespace LyCilph.States
         private GameState game_state;
         private GameOverState game_over_state;
 
+        private Action exit_action;
+
         public State CurrentState { get; private set; }
 
-        public StateManager(GraphicsDevice graphics_device)
+        public StateManager(GraphicsDevice graphics_device, Action exit_action)
         {
             main_menu_state = new MainMenuState(this);
             game_state = new GameState(this, graphics_device);
             game_over_state = new GameOverState(this);
+
+            this.exit_action = exit_action;
         }
 
         public void LoadContent(ContentManager content)
@@ -58,6 +63,11 @@ namespace LyCilph.States
         public void TransitionToMainMenuState()
         {
             CurrentState = main_menu_state;
+        }
+
+        public void Exit()
+        {
+            exit_action();
         }
     }
 }

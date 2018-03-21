@@ -19,6 +19,7 @@ namespace LyCilph.Elements
         public Snake()
         {
             Body = new LinkedList<Cell>();
+            Reset();
         }
 
         public void Reset()

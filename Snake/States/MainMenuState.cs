@@ -29,6 +29,9 @@ namespace LyCilph.States
 
             if (input.IsPressed(Keys.D3))
                 state_manager.TransitionToGameState(ControllerType.NeuralNetwork);
+
+            if (input.IsPressed(Keys.Escape))
+                state_manager.Exit();
         }
 
         public override void Draw(SpriteBatch sprite_batch)

@@ -87,6 +87,9 @@ namespace LyCilph.States
             if (input.IsPressed(Keys.S))
                 update_manager.Step();
 
+            if (input.IsPressed(Keys.Escape))
+                state_manager.TransitionToMainMenuState();
+
             controller.HandleInput(input);
             nn.HandleInput(input);
         }

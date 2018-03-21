@@ -1,7 +1,5 @@
-﻿using LyCilph.States;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using System;
 
 namespace LyCilph
@@ -35,7 +33,7 @@ namespace LyCilph
         protected override void Initialize()
         {
             input_manager = new InputManager();
-            state_manager = new StateManager(GraphicsDevice);
+            state_manager = new StateManager(GraphicsDevice, () => Exit());
             
             state_manager.TransitionToMainMenuState();
 
@@ -64,13 +62,9 @@ namespace LyCilph
 
         protected override void Update(GameTime game_time)
         {
-            input_manager.Begin();
-
             // Handle input
-            if (input_manager.IsPressed(Keys.Escape))
-                Exit();
+            input_manager.Begin();
             state_manager.CurrentState.HandleInput(input_manager);
-
             input_manager.End();
 
             // Update logic
@@ -82,12 +76,12 @@ namespace LyCilph
         {
             GraphicsDevice.Clear(Color.White);
 
+            // Draw stuff
             sprite_batch.Begin();
-
             state_manager.CurrentState.Draw(sprite_batch);
-            base.Draw(game_time);
-
             sprite_batch.End();
+
+            base.Draw(game_time);
         }
     }
 }
