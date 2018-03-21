@@ -65,6 +65,23 @@ namespace LyCilph.Controllers
             hidden2_to_output_weights.Map(_ => rnd.NextDouble() * 2.0 - 1.0, hidden2_to_output_weights);
         }
 
+        public Chromosome GetChromosome()
+        {
+            return new Chromosome
+            {
+                input_to_hidden1_weights = input_to_hidden1_weights.ToColumnMajorArray(),
+                hidden1_to_hidden2_weights = hidden1_to_hidden2_weights.ToColumnMajorArray(),
+                hidden2_to_output_weights = hidden2_to_output_weights.ToColumnMajorArray()
+            };
+        }
+
+        public void SetChromosome(Chromosome chromosome)
+        {
+            input_to_hidden1_weights = Matrix<double>.Build.Dense(25, 18, chromosome.input_to_hidden1_weights);
+            hidden1_to_hidden2_weights = Matrix<double>.Build.Dense(19, 18, chromosome.hidden1_to_hidden2_weights);
+            hidden2_to_output_weights = Matrix<double>.Build.Dense(19, 4, chromosome.hidden2_to_output_weights);
+        }
+
         public override void HandleInput(InputManager input)
         {
             // Get input for ai

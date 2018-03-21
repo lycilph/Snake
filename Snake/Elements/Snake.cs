@@ -78,6 +78,11 @@ namespace LyCilph.Elements
             Energy--;
         }
 
+        public bool OutOfBoard()
+        {
+            return Head.X < 0 || Head.X >= Settings.board_size || Head.Y < 0 || Head.Y >= Settings.board_size;
+        }
+
         public bool HitSelf()
         {
             // Skipping 3 here, as the snake cannot hit it's own head or the first 2 segments

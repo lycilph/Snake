@@ -1,7 +1,5 @@
-﻿using LyCilph.Controllers;
+﻿using LyCilph.Elements;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Trainer
 {
@@ -9,17 +7,12 @@ namespace Trainer
     {
         static void Main(string[] args)
         {
-            var runs = 1000;
-            var sim = new Simulation();
-            var nns = Enumerable.Range(0, runs).Select(_ => new NeuralNetworkController(sim.food, sim.snake)).ToList();
-            var results = Enumerable.Range(0, runs).ToList();
+            var food = new Cell();
+            var snake = new Snake();
+            var sim = new Simulation(food, snake, runs_per_specimen: 5 );
+            var population = new Population(food, snake, size: 1000, mutation_rate: 0.01);
 
-            for (int i = 0; i < runs; i++)
-            {
-                sim.Run(nns[i]);
-                results[i] = sim.snake.Age;
-            }
-            Console.WriteLine($"Max age {results.Max()}");
+            sim.Run(population, generations: 10);
 
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();

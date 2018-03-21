@@ -42,6 +42,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Controllers\Chromosome.cs" />
     <Compile Include="Elements\Cell.cs" />
     <Compile Include="States\GameOverState.cs" />
     <Compile Include="Controllers\ControllerType.cs" />
