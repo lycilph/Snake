@@ -2,7 +2,9 @@
 using LyCilph.Elements;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace Trainer
 {
@@ -22,6 +24,11 @@ namespace Trainer
 
         public void Run(Population population, int generations)
         {
+            var exe_dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var filename = Path.Combine(exe_dir, "fitness.csv");
+            File.Delete(filename);
+
+            var sw_total = Stopwatch.StartNew();
             for (int i = 0; i < generations; i++)
             {
                 Console.WriteLine($"Generation {i + 1} of {generations} - population size {population.Size}");
@@ -30,15 +37,22 @@ namespace Trainer
                 Run(population);
 
                 // Debug information
-                var best = population.current_generation.OrderBy(s => s.fitness).Last();
+                var ordered = population.current_generation.OrderByDescending(s => s.fitness).ToList();
+                var best = ordered.First();
                 Console.WriteLine($"   Fitness: {best.fitness:N2}");
                 Console.WriteLine($"   Age: {best.average_age:N2}");
                 Console.WriteLine($"   Score: {best.average_score:N2}");
-                Console.WriteLine($"   Generation simulation: {sw.ElapsedMilliseconds / 1000.0} s");
+                Console.WriteLine($"   Simulation: {sw.ElapsedMilliseconds / 1000.0} s");
+
+                var fitness_values = ordered.Select(s => s.fitness);
+                var fitness_values_text = string.Join(";", fitness_values);
+                File.AppendAllText(filename, fitness_values_text + Environment.NewLine);
 
                 population.NextGeneration();
                 sw.Stop();
             }
+            sw_total.Stop();
+            Console.WriteLine($"Total time: {sw_total.ElapsedMilliseconds / 1000.0} s");
         }
 
         public void Run(Population population)

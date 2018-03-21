@@ -10,8 +10,6 @@ namespace Trainer
     {
         private Random rnd = new Random((int)DateTime.Now.Ticks);
 
-        //private Chromosome global_best_chromosome;
-        //private double global_best_fitness;
         private double mutation_rate;
 
         public List<Specimen> old_generation = new List<Specimen>();
@@ -34,16 +32,16 @@ namespace Trainer
             // Swap generations
             (old_generation, current_generation) = (current_generation, old_generation);
 
-            // Keep 10% best (not just global best)
-            var top_10_percent_count = current_generation.Count / 10;
+            // Keep 10% best as is
+            var top_10_percent = current_generation.Count / 10;
             var old_generation_sorted = old_generation.OrderByDescending(s => s.fitness).ToList();
-            for (int i = 0; i < top_10_percent_count; i++)
+            for (int i = 0; i < top_10_percent; i++)
             {
                 current_generation[i].Chromosome = old_generation_sorted[i].Chromosome;
             }
 
             var total_fitness = old_generation.Sum(s => s.fitness);
-            for (int i = top_10_percent_count; i < current_generation.Count; i++)
+            for (int i = top_10_percent; i < current_generation.Count; i++)
             {
                 var parent1_chromosome = Select(total_fitness);
                 var parent2_chromosome = Select(total_fitness);
