@@ -1,7 +1,7 @@
 ﻿using MathNet.Numerics.Distributions;
 using System;
 
-namespace LyCilph.Controllers
+namespace LyCilph.Elements
 {
     public class Chromosome
     {

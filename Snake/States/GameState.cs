@@ -47,9 +47,12 @@ namespace LyCilph.States
             nn.Debug = true;
         }
 
-        public void SetNeuralNetworkController()
+        public void SetNeuralNetworkController(Chromosome chromosome)
         {
-            controller = new NeuralNetworkController(food, snake);
+            var neural_network_controller = new NeuralNetworkController(food, snake);
+            neural_network_controller.SetChromosome(chromosome);
+
+            controller = neural_network_controller;
             nn.Debug = false;
         }
 

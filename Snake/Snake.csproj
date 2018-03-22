@@ -42,7 +42,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Controllers\Chromosome.cs" />
+    <Compile Include="Elements\Chromosome.cs" />
     <Compile Include="Elements\Cell.cs" />
     <Compile Include="States\GameOverState.cs" />
     <Compile Include="Controllers\ControllerType.cs" />
@@ -74,6 +74,7 @@
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
