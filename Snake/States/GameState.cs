@@ -20,7 +20,6 @@ namespace LyCilph.States
         private Cell food;
         private Snake snake;
         private Controller controller;
-        private NeuralNetworkController nn;
 
         public GameState(StateManager state_manager, GraphicsDevice graphics_device) : base(state_manager)
         {
@@ -31,30 +30,22 @@ namespace LyCilph.States
 
             food = new Cell();
             snake = new Snake();
-            nn = new NeuralNetworkController(food, snake);
             SetPlayerController();
         }
 
         public void SetPlayerController()
         {
             controller = new PlayerController(food, snake);
-            nn.Debug = true;
         }
 
         public void SetSimpleController()
         {
             controller = new SimpleAIController(food, snake);
-            nn.Debug = true;
         }
 
         public void SetNeuralNetworkController(Chromosome chromosome)
         {
-            var neural_network_controller = new NeuralNetworkController(food, snake);
-            neural_network_controller.SetChromosome(chromosome);
-            neural_network_controller.Debug = false;
-
-            controller = neural_network_controller;
-            nn.Debug = false;
+            controller = new NeuralNetworkController(food, snake, chromosome);
         }
 
         public override void Reset()
@@ -62,7 +53,6 @@ namespace LyCilph.States
             food.Random();
             snake.Reset();
             update_manager.Reset();
-            nn.Reset();
         }
 
         public override void LoadContent(ContentManager content)
@@ -95,7 +85,6 @@ namespace LyCilph.States
                 state_manager.TransitionToMainMenuState();
 
             controller.HandleInput(input);
-            //nn.HandleInput(input);
         }
 
         public override void Update(GameTime game_time)
@@ -163,25 +152,28 @@ namespace LyCilph.States
             sprite_batch.DrawString(font, $"Energy: {snake.Energy}", new Vector2(board_size + 5, 40), Color.Black);
 
             // Neural network information
-            sprite_batch.DrawString(font, "Distance to edge", new Vector2(board_size + 20, 100), Color.Black);
-            sprite_batch.DrawString(font, $"{nn.Input[7]:N3} {nn.Input[0]:N3} {nn.Input[1]:N3}", new Vector2(board_size + 20, 120), Color.Black);
-            sprite_batch.DrawString(font, $"{nn.Input[6]:N3}   *   {nn.Input[2]:N3}", new Vector2(board_size + 20, 140), Color.Black);
-            sprite_batch.DrawString(font, $"{nn.Input[5]:N3} {nn.Input[4]:N3} {nn.Input[3]:N3}", new Vector2(board_size + 20, 160), Color.Black);
+            if (controller is NeuralNetworkController nn)
+            {
+                sprite_batch.DrawString(font, "Distance to edge", new Vector2(board_size + 20, 100), Color.Black);
+                sprite_batch.DrawString(font, $"{nn.Input[7]:N3} {nn.Input[0]:N3} {nn.Input[1]:N3}", new Vector2(board_size + 20, 120), Color.Black);
+                sprite_batch.DrawString(font, $"{nn.Input[6]:N3}   *   {nn.Input[2]:N3}", new Vector2(board_size + 20, 140), Color.Black);
+                sprite_batch.DrawString(font, $"{nn.Input[5]:N3} {nn.Input[4]:N3} {nn.Input[3]:N3}", new Vector2(board_size + 20, 160), Color.Black);
 
-            sprite_batch.DrawString(font, "Distance to body", new Vector2(board_size + 20, 200), Color.Black);
-            sprite_batch.DrawString(font, $"{nn.Input[15]:N3} {nn.Input[8]:N3} {nn.Input[9]:N3}", new Vector2(board_size + 20, 220), Color.Black);
-            sprite_batch.DrawString(font, $"{nn.Input[14]:N3}   *   {nn.Input[10]:N3}", new Vector2(board_size + 20, 240), Color.Black);
-            sprite_batch.DrawString(font, $"{nn.Input[13]:N3} {nn.Input[12]:N3} {nn.Input[11]:N3}", new Vector2(board_size + 20, 260), Color.Black);
+                sprite_batch.DrawString(font, "Distance to body", new Vector2(board_size + 20, 200), Color.Black);
+                sprite_batch.DrawString(font, $"{nn.Input[15]:N3} {nn.Input[8]:N3} {nn.Input[9]:N3}", new Vector2(board_size + 20, 220), Color.Black);
+                sprite_batch.DrawString(font, $"{nn.Input[14]:N3}   *   {nn.Input[10]:N3}", new Vector2(board_size + 20, 240), Color.Black);
+                sprite_batch.DrawString(font, $"{nn.Input[13]:N3} {nn.Input[12]:N3} {nn.Input[11]:N3}", new Vector2(board_size + 20, 260), Color.Black);
 
-            sprite_batch.DrawString(font, "Found food", new Vector2(board_size + 20, 300), Color.Black);
-            sprite_batch.DrawString(font, $"{nn.Input[23]} {nn.Input[16]} {nn.Input[17]}", new Vector2(board_size + 20, 320), Color.Black);
-            sprite_batch.DrawString(font, $"{nn.Input[22]} * {nn.Input[18]}", new Vector2(board_size + 20, 340), Color.Black);
-            sprite_batch.DrawString(font, $"{nn.Input[21]} {nn.Input[20]} {nn.Input[19]}", new Vector2(board_size + 20, 360), Color.Black);
+                sprite_batch.DrawString(font, "Found food", new Vector2(board_size + 20, 300), Color.Black);
+                sprite_batch.DrawString(font, $"{nn.Input[23]} {nn.Input[16]} {nn.Input[17]}", new Vector2(board_size + 20, 320), Color.Black);
+                sprite_batch.DrawString(font, $"{nn.Input[22]} * {nn.Input[18]}", new Vector2(board_size + 20, 340), Color.Black);
+                sprite_batch.DrawString(font, $"{nn.Input[21]} {nn.Input[20]} {nn.Input[19]}", new Vector2(board_size + 20, 360), Color.Black);
 
-            sprite_batch.DrawString(font, "Direction", new Vector2(board_size + 20, 400), Color.Black);
-            sprite_batch.DrawString(font, $"      {nn.Output[0]:N2}", new Vector2(board_size + 20, 420), Color.Black);
-            sprite_batch.DrawString(font, $"{nn.Output[3]:N2} * {nn.Output[1]:N2}", new Vector2(board_size + 20, 440), Color.Black);
-            sprite_batch.DrawString(font, $"      {nn.Output[2]:N2}", new Vector2(board_size + 20, 460), Color.Black);
+                sprite_batch.DrawString(font, "Direction", new Vector2(board_size + 20, 400), Color.Black);
+                sprite_batch.DrawString(font, $"      {nn.Output[0]:N2}", new Vector2(board_size + 20, 420), Color.Black);
+                sprite_batch.DrawString(font, $"{nn.Output[3]:N2} * {nn.Output[1]:N2}", new Vector2(board_size + 20, 440), Color.Black);
+                sprite_batch.DrawString(font, $"      {nn.Output[2]:N2}", new Vector2(board_size + 20, 460), Color.Black);
+            }
 
             // Speed information
             sprite_batch.DrawString(font, $"(R)un/pause", new Vector2(board_size + 5, board_size - 65), Color.Black);

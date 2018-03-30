@@ -15,7 +15,6 @@ namespace LyCilph.Controllers
 
         public Vector<double> Input { get; set; }
         public Vector<double> Output { get; set; }
-        public bool Debug { get; set; } = false;
 
         /* Input indexes and their meaning
          
@@ -43,7 +42,7 @@ namespace LyCilph.Controllers
            24 bias input
         */
 
-        public NeuralNetworkController(Cell food, Snake snake) : base(food, snake)
+        public NeuralNetworkController(Cell food, Snake snake, Chromosome chromosome = null) : base(food, snake)
         {
             Input = Vector<double>.Build.Dense(25); // Add a bias input here
             Output = Vector<double>.Build.Dense(4);
@@ -53,6 +52,8 @@ namespace LyCilph.Controllers
             hidden2_to_output_weights = Matrix<double>.Build.Dense(19, 4);
 
             Reset();
+            if (chromosome != null)
+                SetChromosome(chromosome);
         }
 
         public void Reset()
@@ -89,8 +90,7 @@ namespace LyCilph.Controllers
             // Run neural network
             Execute();
             // Get output from ai and move
-            if (!Debug)
-                SetDirection();
+            SetDirection();
         }
 
         private void UpdateInput()
