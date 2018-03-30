@@ -2,12 +2,9 @@
 using LyCilph.Elements;
 using LyCilph.States;
 using LyCilph.Utils;
-using Microsoft.Win32;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.IO;
-using System.Reflection;
 
 namespace LyCilph
 {
@@ -37,7 +34,7 @@ namespace LyCilph
             game_over_state.LoadContent(content);
         }
 
-        public void TransitionToGameState(ControllerType controller)
+        public void TransitionToGameState(ControllerType controller, string chromosome_filename = null)
         {
             switch (controller)
             {
@@ -48,20 +45,8 @@ namespace LyCilph
                     game_state.SetSimpleController();
                     break;
                 case ControllerType.NeuralNetwork:
-                    var ofd = new OpenFileDialog();
-                    ofd.InitialDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                    ofd.DefaultExt = ".snake"; // Default file extension
-                    ofd.Filter = "Snake (.snake)|*.snake"; // Filter files by extension
-
-                    // Show open file dialog box
-                    bool? result = ofd.ShowDialog();
-
-                    // Process open file dialog box results
-                    if (result == true)
-                    {
-                        var chromosome = JsonUtils.ReadFromFile<Chromosome>(ofd.FileName);
-                        game_state.SetNeuralNetworkController(chromosome);
-                    }
+                    var chromosome = JsonUtils.ReadFromFile<Chromosome>(chromosome_filename);
+                    game_state.SetNeuralNetworkController(chromosome);
                     break;
                 default:
                     throw new ArgumentException($"Unknown controller type - {controller}");

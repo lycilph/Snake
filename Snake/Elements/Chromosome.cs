@@ -6,7 +6,7 @@ namespace LyCilph.Elements
     public class Chromosome
     {
         private static Random rnd = new Random((int)DateTime.Now.Ticks);
-        private static Normal normal = Normal.WithMeanStdDev(0.0, 0.1);
+        private static Normal normal = Normal.WithMeanStdDev(0.0, 0.5);
 
         public double[] input_to_hidden1_weights { get; set; }
         public double[] hidden1_to_hidden2_weights { get; set; }

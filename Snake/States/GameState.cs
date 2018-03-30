@@ -51,6 +51,7 @@ namespace LyCilph.States
         {
             var neural_network_controller = new NeuralNetworkController(food, snake);
             neural_network_controller.SetChromosome(chromosome);
+            neural_network_controller.Debug = false;
 
             controller = neural_network_controller;
             nn.Debug = false;
@@ -94,7 +95,7 @@ namespace LyCilph.States
                 state_manager.TransitionToMainMenuState();
 
             controller.HandleInput(input);
-            nn.HandleInput(input);
+            //nn.HandleInput(input);
         }
 
         public override void Update(GameTime game_time)
