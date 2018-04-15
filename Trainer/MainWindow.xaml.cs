@@ -1,6 +1,7 @@
 ﻿using OxyPlot;
 using OxyPlot.Series;
 using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -44,6 +45,20 @@ namespace Trainer
         }
         public static readonly DependencyProperty PopulationSizeProperty = DependencyProperty.Register("PopulationSize", typeof(int), typeof(MainWindow), new PropertyMetadata(0));
 
+        public int Generation
+        {
+            get { return (int)GetValue(GenerationProperty); }
+            set { SetValue(GenerationProperty, value); }
+        }
+        public static readonly DependencyProperty GenerationProperty = DependencyProperty.Register("Generation", typeof(int), typeof(MainWindow), new PropertyMetadata(0));
+
+        public ObservableCollection<string> Messages
+        {
+            get { return (ObservableCollection<string>)GetValue(MessagesProperty); }
+            set { SetValue(MessagesProperty, value); }
+        }
+        public static readonly DependencyProperty MessagesProperty = DependencyProperty.Register("Messages", typeof(ObservableCollection<string>), typeof(MainWindow), new PropertyMetadata(null));
+
         public MainWindow()
         {
             InitializeComponent();
@@ -53,8 +68,6 @@ namespace Trainer
 
             fitness_series = new LineSeries { Title = "Fitness" };
             fitness_series.Points.Add(new DataPoint(0, 0));
-            fitness_series.Points.Add(new DataPoint(1, 0.5));
-            fitness_series.Points.Add(new DataPoint(2, 1.5));
             Model.Series.Add(fitness_series);
 
             progress = new Progress<int>(i => 
@@ -62,10 +75,16 @@ namespace Trainer
                 Counter += i;
                 if (Counter > PopulationSize)
                     Counter = 0;
+
+                Messages.Insert(0, $"Counter {Counter}");
+                if (Messages.Count > 15)
+                    Messages.RemoveAt(Messages.Count - 1);
             });
 
             Counter = 0;
             PopulationSize = 100;
+            Generation = 1;
+            Messages = new ObservableCollection<string>();
         }
 
         private void StartClick(object sender, RoutedEventArgs e)
@@ -96,7 +115,13 @@ namespace Trainer
                     Debug.WriteLine("Simulation was cancelled");
                 }
             })
-            .ContinueWith(a => Running = false, scheduler);
+            .ContinueWith(a => 
+            {
+                fitness_series.Points.Add(new DataPoint(Generation, rnd.NextDouble() * 10.0));
+                Running = false;
+                Generation++;
+                Model.InvalidatePlot(true);
+            }, scheduler);
         }
 
         private void StopClick(object sender, RoutedEventArgs e)

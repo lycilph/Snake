@@ -23,7 +23,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Row="0" Grid.Column="0" Width="100">
@@ -31,6 +31,15 @@
             <Button Content="Load" IsEnabled="{Binding Running, Converter={StaticResource inverse_boolean}}"/>
             <Button Content="Start" Click="StartClick" IsEnabled="{Binding Running, Converter={StaticResource inverse_boolean}}"/>
             <Button Content="Stop" Click="StopClick" IsEnabled="{Binding Running}"/>
+        </StackPanel>
+
+        <ItemsControl Grid.Row="0" Grid.Column="1" Margin="10,0" ItemsSource="{Binding Messages}"/>
+
+        <StackPanel Grid.Row="0" Grid.Column="2" Width="100">
+            <TextBlock Text="{Binding Generation, StringFormat=Generation {0}}"/>
+            <TextBlock Text="{Binding PopulationSize, StringFormat=Population {0}}"/>
+            <TextBlock Text="Generation time"/>
+            <TextBlock Text="Total time"/>
         </StackPanel>
 
         <ProgressBar Value="{Binding Counter}" Maximum="{Binding PopulationSize}" Grid.Row="1" Grid.ColumnSpan="3"/>
