@@ -27,18 +27,18 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Row="0" Grid.Column="0" Width="100">
-            <Button Content="Create" IsEnabled="{Binding Running, Converter={StaticResource inverse_boolean}}"/>
-            <Button Content="Load" IsEnabled="{Binding Running, Converter={StaticResource inverse_boolean}}"/>
-            <Button Content="Start" Click="StartClick" IsEnabled="{Binding Running, Converter={StaticResource inverse_boolean}}"/>
-            <Button Content="Stop" Click="StopClick" IsEnabled="{Binding Running}"/>
+            <Button Content="Create" Click="CreateClick" IsEnabled="{Binding Running, Converter={StaticResource inverse_boolean}}"/>
+            <Button Content="Load" Click="LoadClick" Margin="0,10,0,0" IsEnabled="{Binding Running, Converter={StaticResource inverse_boolean}}"/>
+            <Button Content="Start" Click="StartClick" Margin="0,10,0,0" IsEnabled="{Binding Running, Converter={StaticResource inverse_boolean}}"/>
+            <Button Content="Stop" Click="StopClick" Margin="0,10,0,0" IsEnabled="{Binding Running}"/>
         </StackPanel>
 
         <ItemsControl Grid.Row="0" Grid.Column="1" Margin="10,0" ItemsSource="{Binding Messages}"/>
 
-        <StackPanel Grid.Row="0" Grid.Column="2" Width="100">
+        <StackPanel Grid.Row="0" Grid.Column="2" Width="150">
             <TextBlock Text="{Binding Generation, StringFormat=Generation {0}}"/>
             <TextBlock Text="{Binding PopulationSize, StringFormat=Population {0}}"/>
-            <TextBlock Text="Generation time"/>
+            <TextBlock Text="{Binding SimulationRuns, StringFormat=Runs {0}}"/>
             <TextBlock Text="Total time"/>
         </StackPanel>
 
