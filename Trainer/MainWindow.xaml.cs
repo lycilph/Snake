@@ -91,9 +91,9 @@ namespace Trainer
 
         private void AddMessage(string msg)
         {
-            Messages.Insert(0, msg);
+            Messages.Add(msg);
             if (Messages.Count > 15)
-                Messages.RemoveAt(Messages.Count - 1);
+                Messages.RemoveAt(0);
         }
 
         private void Reset()
@@ -139,6 +139,8 @@ namespace Trainer
             var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
             var simulation_runs = SimulationRuns;
 
+            use cts.Token.ThrowIfCancellationRequested
+
             Task.Run(()=> 
             {
                 var sw = new Stopwatch();
@@ -169,68 +171,34 @@ namespace Trainer
                     }
 
                     // Order population by fitness
-                    var ordered_population = population.OrderByDescending(i => i.fitness).ToList();
-
-                    sw.Stop();
-                    var elapsed = sw.ElapsedMilliseconds;
-                    Task.Factory.StartNew(() =>
+                    if (!cts.IsCancellationRequested)
                     {
-                        AddMessage($"Generation {Generation} took {elapsed} ms");
-                        AddMessage($"Maximum fitness {ordered_population.First().fitness}");
+                        var ordered_population = population.OrderByDescending(i => i.fitness).ToList();
 
-                        fitness_series.Points.Add(new DataPoint(Generation, ordered_population.First().fitness));
-                        Model.InvalidatePlot(true);
+                        sw.Stop();
+                        var elapsed = sw.ElapsedMilliseconds;
+                        Task.Factory.StartNew(() =>
+                        {
+                            AddMessage($" * Simulation took {elapsed} ms");
+                            AddMessage($" * Maximum fitness {ordered_population.First().fitness}");
 
-                        Generation++;
-                        Counter = 0;
-                    }, CancellationToken.None, TaskCreationOptions.None, scheduler)
-                    .Wait();
+                            fitness_series.Points.Add(new DataPoint(Generation, ordered_population.First().fitness));
+                            Model.InvalidatePlot(true);
+
+                            Generation++;
+                            Counter = 0;
+                        }, CancellationToken.None, TaskCreationOptions.None, scheduler)
+                        .Wait();
+                    }
+                    else
+                    {
+                        Task.Factory.StartNew(() =>
+                        {
+                            AddMessage("Simulation stopped");
+                        }, CancellationToken.None, TaskCreationOptions.None, scheduler);
+                    }
                 }
             });
-
-            //Counter = 0;
-            //PopulationSize = 200;
-            //var population = Enumerable.Range(0, PopulationSize).Select(_ => new Individual()).ToList();
-
-            //var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
-            //Task.Run(() =>
-            //{
-            //    var sw = Stopwatch.StartNew();
-
-            //    Task.Factory.StartNew(() =>
-            //    {
-            //        AddMessage($"Starting generation {Generation}");
-            //    }, CancellationToken.None, TaskCreationOptions.None, scheduler);
-
-            //    // Simulate all individuals in a population
-            //    try
-            //    {
-            //        var po = new ParallelOptions { CancellationToken = cts.Token };
-            //        Parallel.ForEach(population, po, i =>
-            //        {
-            //            i.Simulate(5);
-            //            progress.Report(1);
-            //        });
-
-            //    }
-            //    catch (Exception)
-            //    {
-            //        Debug.WriteLine("Simulation was cancelled");
-            //    }
-
-            //    sw.Stop();
-            //    Task.Factory.StartNew(() =>
-            //    {
-            //        AddMessage($"Generation {Generation} took {sw.ElapsedMilliseconds} ms");
-            //    }, CancellationToken.None, TaskCreationOptions.None, scheduler);
-            //})
-            //.ContinueWith(a => 
-            //{
-            //    fitness_series.Points.Add(new DataPoint(Generation, rnd.NextDouble() * 10.0));
-            //    Running = false;
-            //    Generation++;
-            //    Model.InvalidatePlot(true);
-            //}, scheduler);
         }
 
         private void StopClick(object sender, RoutedEventArgs e)
