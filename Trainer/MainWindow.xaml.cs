@@ -1,4 +1,5 @@
-﻿using OxyPlot;
+﻿using LyCilph.Elements;
+using OxyPlot;
 using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace Trainer
 {
@@ -18,6 +20,7 @@ namespace Trainer
         private IProgress<int> progress;
         private CancellationTokenSource cts;
         private List<Individual> population;
+        private DispatcherTimer timer;
 
         public PlotModel Model
         {
@@ -32,6 +35,13 @@ namespace Trainer
             set { SetValue(RunningProperty, value); }
         }
         public static readonly DependencyProperty RunningProperty = DependencyProperty.Register("Running", typeof(bool), typeof(MainWindow), new PropertyMetadata(false));
+
+        public double TotalRunTime
+        {
+            get { return (double)GetValue(TotalRunTimeProperty); }
+            set { SetValue(TotalRunTimeProperty, value); }
+        }
+        public static readonly DependencyProperty TotalRunTimeProperty = DependencyProperty.Register("TotalRunTime", typeof(double), typeof(MainWindow), new PropertyMetadata(0.0));
 
         public int Counter
         {
@@ -53,6 +63,20 @@ namespace Trainer
             set { SetValue(SimulationRunsProperty, value); }
         }
         public static readonly DependencyProperty SimulationRunsProperty = DependencyProperty.Register("SimulationRuns", typeof(int), typeof(MainWindow), new PropertyMetadata(5));
+
+        public int PercentToKeep
+        {
+            get { return (int)GetValue(PercentToKeepProperty); }
+            set { SetValue(PercentToKeepProperty, value); }
+        }
+        public static readonly DependencyProperty PercentToKeepProperty = DependencyProperty.Register("PercentToKeep", typeof(int), typeof(MainWindow), new PropertyMetadata(20));
+
+        public double MutationRate
+        {
+            get { return (double)GetValue(MutationRateProperty); }
+            set { SetValue(MutationRateProperty, value); }
+        }
+        public static readonly DependencyProperty MutationRateProperty = DependencyProperty.Register("MutationRate", typeof(double), typeof(MainWindow), new PropertyMetadata(0.01));
 
         public int Generation
         {
@@ -86,6 +110,10 @@ namespace Trainer
 
             Messages = new ObservableCollection<string>();
 
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(100);
+            timer.Tick += (s, e) => TotalRunTime += 0.1;
+
             Reset();
         }
 
@@ -101,6 +129,7 @@ namespace Trainer
             Messages.Clear();
             Counter = 0;
             Generation = 1;
+            TotalRunTime = 0.0;
 
             fitness_series.Points.Clear();
             fitness_series.Points.Add(new DataPoint(0, 0));
@@ -115,7 +144,9 @@ namespace Trainer
             {
                 Owner = this,
                 PopulationSize = PopulationSize,
-                SimulationRuns = SimulationRuns
+                SimulationRuns = SimulationRuns,
+                PercentToKeep = PercentToKeep,
+                MutationRate = MutationRate
             };
 
             var result = create_dialog.ShowDialog();
@@ -123,6 +154,8 @@ namespace Trainer
             {
                 PopulationSize = create_dialog.PopulationSize;
                 SimulationRuns = create_dialog.SimulationRuns;
+                PercentToKeep = create_dialog.PercentToKeep;
+                MutationRate = create_dialog.MutationRate;
                 Reset();
             }
         }
@@ -134,29 +167,35 @@ namespace Trainer
 
         private void StartClick(object sender, RoutedEventArgs e)
         {
+            Counter = 0;
             Running = true;
             cts = new CancellationTokenSource();
             var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
             var simulation_runs = SimulationRuns;
+            var percent_to_keep = PercentToKeep;
+            var mutation_rate = MutationRate;
 
-            use cts.Token.ThrowIfCancellationRequested
+            // This starts the total run time
+            timer.Start();
 
-            Task.Run(()=> 
+            Task.Run(() => 
             {
-                var sw = new Stopwatch();
-
-                while (!cts.IsCancellationRequested)
+                try
                 {
-                    sw.Restart();
+                    var sw = new Stopwatch();
 
-                    Task.Factory.StartNew(() =>
+                    while (true)
                     {
-                        AddMessage($"Starting generation {Generation}");
-                    }, CancellationToken.None, TaskCreationOptions.None, scheduler);
+                        // Check if simulation was cancelled
+                        cts.Token.ThrowIfCancellationRequested();
 
-                    // Simulate all individuals in a population
-                    try
-                    {
+                        sw.Restart();
+                        Task.Factory.StartNew(() =>
+                        {
+                            AddMessage($"Starting generation {Generation}");
+                        }, CancellationToken.None, TaskCreationOptions.None, scheduler);
+
+                        // Simulate all individuals in a population
                         var po = new ParallelOptions { CancellationToken = cts.Token };
                         Parallel.ForEach(population, po, i =>
                         {
@@ -164,47 +203,82 @@ namespace Trainer
                             progress.Report(1);
                         });
 
-                    }
-                    catch (Exception)
-                    {
-                        Debug.WriteLine("Simulation was cancelled");
-                    }
-
-                    // Order population by fitness
-                    if (!cts.IsCancellationRequested)
-                    {
+                        // Order population by fitness
                         var ordered_population = population.OrderByDescending(i => i.fitness).ToList();
+                        var best = ordered_population.First();
+
+                        // Setup new population
+                        var new_generation = Enumerable.Range(0, population.Count).Select(_ => new Individual()).ToList();
+
+                        // Keep the best
+                        var amount_to_keep = (int)Math.Round(ordered_population.Count * (percent_to_keep / 100.0));
+                        for (int i = 0; i < amount_to_keep; i++)
+                        {
+                            new_generation[i] = ordered_population[i];
+                        }
+
+                        // Breed the rest
+                        var total_fitness = ordered_population.Sum(s => s.fitness);
+                        for (int i = amount_to_keep; i < population.Count; i++)
+                        {
+                            var parent1_chromosome = Select(ordered_population, total_fitness);
+                            var parent2_chromosome = Select(ordered_population, total_fitness);
+                            var child_chromosome = Chromosome.Cross(parent1_chromosome, parent2_chromosome);
+                            child_chromosome.Mutate(mutation_rate);
+
+                            new_generation[i].Chromosome = child_chromosome;
+
+                            // Check if simulation was cancelled
+                            cts.Token.ThrowIfCancellationRequested();
+                        }
 
                         sw.Stop();
                         var elapsed = sw.ElapsedMilliseconds;
                         Task.Factory.StartNew(() =>
                         {
                             AddMessage($" * Simulation took {elapsed} ms");
-                            AddMessage($" * Maximum fitness {ordered_population.First().fitness}");
+                            AddMessage($" * Maximum fitness {best.fitness}, Age {best.average_age}, Score {best.average_score}");
 
                             fitness_series.Points.Add(new DataPoint(Generation, ordered_population.First().fitness));
                             Model.InvalidatePlot(true);
 
                             Generation++;
                             Counter = 0;
+
+                            // Update the population
+                            population = new_generation;
                         }, CancellationToken.None, TaskCreationOptions.None, scheduler)
                         .Wait();
-                    }
-                    else
-                    {
-                        Task.Factory.StartNew(() =>
-                        {
-                            AddMessage("Simulation stopped");
-                        }, CancellationToken.None, TaskCreationOptions.None, scheduler);
-                    }
+                    };
                 }
-            });
+                catch (OperationCanceledException)
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        AddMessage("Simulation stopped");
+                    }, CancellationToken.None, TaskCreationOptions.None, scheduler);
+                }
+            }, cts.Token);
         }
 
         private void StopClick(object sender, RoutedEventArgs e)
         {
             Running = false;
             cts.Cancel();
+            timer.Stop(); // This stops the total run time
+        }
+
+        private Chromosome Select(List<Individual> population, double total_fitness)
+        {
+            var s = rnd.NextDouble() * total_fitness;
+            var running_sum = 0.0;
+            foreach (var specimen in population)
+            {
+                running_sum += specimen.fitness;
+                if (running_sum > s)
+                    return specimen.Chromosome;
+            }
+            return null;
         }
     }
 }

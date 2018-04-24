@@ -22,6 +22,20 @@ namespace Trainer
         }
         public static readonly DependencyProperty SimulationRunsProperty = DependencyProperty.Register("SimulationRuns", typeof(int), typeof(CreateDialog), new PropertyMetadata(5));
 
+        public int PercentToKeep
+        {
+            get { return (int)GetValue(PercentToKeepProperty); }
+            set { SetValue(PercentToKeepProperty, value); }
+        }
+        public static readonly DependencyProperty PercentToKeepProperty = DependencyProperty.Register("PercentToKeep", typeof(int), typeof(CreateDialog), new PropertyMetadata(0));
+
+        public double MutationRate
+        {
+            get { return (double)GetValue(MutationRateProperty); }
+            set { SetValue(MutationRateProperty, value); }
+        }
+        public static readonly DependencyProperty MutationRateProperty = DependencyProperty.Register("MutationRate", typeof(double), typeof(CreateDialog), new PropertyMetadata(0.01));
+
         public CreateDialog()
         {
             InitializeComponent();

@@ -39,7 +39,9 @@
             <TextBlock Text="{Binding Generation, StringFormat=Generation {0}}"/>
             <TextBlock Text="{Binding PopulationSize, StringFormat=Population {0}}"/>
             <TextBlock Text="{Binding SimulationRuns, StringFormat=Runs {0}}"/>
-            <TextBlock Text="Total time"/>
+            <TextBlock Text="{Binding TotalRunTime, StringFormat=Total Time {0:N1} sec}"/>
+            <TextBlock Text="{Binding PercentToKeep, StringFormat=Keep {0}%}"/>
+            <TextBlock Text="{Binding MutationRate, StringFormat=Mutation Rate {0}}"/>
         </StackPanel>
 
         <ProgressBar Value="{Binding Counter}" Maximum="{Binding PopulationSize}" Grid.Row="1" Grid.ColumnSpan="3"/>

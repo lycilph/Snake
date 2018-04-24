@@ -34,7 +34,12 @@ namespace Trainer
             average_score = 0;
 
             for (int i = 0; i < runs; i++)
+            {
                 SimulateSingleRun();
+
+                average_age += snake.Age;
+                average_score += snake.Score;
+            }
 
             average_age /= runs;
             average_score /= runs;
@@ -52,9 +57,6 @@ namespace Trainer
             {
                 Update();
             }
-
-            average_age += snake.Age;
-            average_score += snake.Score;
         }
 
         public void CalculateFitness()
