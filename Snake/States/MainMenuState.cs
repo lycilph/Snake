@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
@@ -15,8 +16,15 @@ namespace LyCilph.States
         private SpriteFont font;
 
         private string last_chromosome = string.Empty;
+        private bool show_trainer_option = false;
+        private string trainer_path;
 
-        public MainMenuState(StateManager state_manager) : base(state_manager) { }
+        public MainMenuState(StateManager state_manager) : base(state_manager)
+        {
+            trainer_path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "trainer.exe");
+            if (File.Exists(trainer_path))
+                show_trainer_option = true;
+        }
 
         public override void LoadContent(ContentManager content)
         {
@@ -40,6 +48,11 @@ namespace LyCilph.States
                 state_manager.TransitionToGameState(ControllerType.NeuralNetwork, last_chromosome);
             }
 
+            if (input.IsPressed(Keys.D4) && show_trainer_option)
+            {
+                Process.Start(trainer_path);
+            }
+
             if (input.IsPressed(Keys.L))
             {
                 LoadChromosome();
@@ -60,7 +73,16 @@ namespace LyCilph.States
             sprite_batch.DrawString(font, "(2) Simple AI", new Vector2(x, 270), Color.Black);
             sprite_batch.DrawString(font, "(3) Neural Network", new Vector2(x, 290), Color.Black);
             sprite_batch.DrawString(font, "(L)oad new chromosome", new Vector2(x + 20, 310), Color.Black);
-            sprite_batch.DrawString(font, "(Esc) Quit", new Vector2(x, 340), Color.Black);
+
+            if (show_trainer_option)
+            {
+                sprite_batch.DrawString(font, "(4) Start trainer", new Vector2(x, 330), Color.Black);
+                sprite_batch.DrawString(font, "(Esc) Quit", new Vector2(x, 370), Color.Black);
+            }
+            else
+            {
+                sprite_batch.DrawString(font, "(Esc) Quit", new Vector2(x, 340), Color.Black);
+            }
         }
 
         private void LoadChromosome()
