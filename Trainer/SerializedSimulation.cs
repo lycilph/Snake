@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using LyCilph.Elements;
+using System.Collections.Generic;
 
 namespace Trainer
 {
@@ -10,6 +11,6 @@ namespace Trainer
         public int Generation { get; set; }
         public double TotalRuntime { get; set; }
         public List<double> FitnessStatistics { get; set; }
-        public List<Individual> Population { get; set; }
+        public List<Chromosome> Chromosomes { get; set; }
     }
 }

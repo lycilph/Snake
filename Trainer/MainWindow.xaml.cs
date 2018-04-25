@@ -196,7 +196,8 @@ namespace Trainer
                 fitness_series.Points.Add(new DataPoint(i, sim.FitnessStatistics[i]));
             Model.InvalidatePlot(true);
 
-            population = sim.Population;
+            population = sim.Chromosomes.Select(chromosome => new Individual { Chromosome = chromosome }).ToList();
+            PopulationSize = population.Count;
 
             Messages.Add("Loaded " + filename);
         }
@@ -229,7 +230,7 @@ namespace Trainer
                 Generation = Generation,
                 TotalRuntime = TotalRunTime,
                 FitnessStatistics = fitness_series.Points.Select(p => p.Y).ToList(),
-                Population = population
+                Chromosomes = population.Select(p => p.Chromosome).ToList()
             };
             JsonUtils.WriteToFile(filename, sim);
 
