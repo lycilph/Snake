@@ -11,6 +11,7 @@ namespace Trainer
         public int Generation { get; set; }
         public double TotalRuntime { get; set; }
         public List<double> FitnessStatistics { get; set; }
+        public List<double> ScoreStatistics { get; set; }
         public List<Chromosome> Chromosomes { get; set; }
     }
 }

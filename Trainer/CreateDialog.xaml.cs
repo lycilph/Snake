@@ -49,7 +49,7 @@ namespace Trainer
 
         private void ValidateNumericInput(object sender, TextCompositionEventArgs e)
         {
-            e.Handled = regex.IsMatch(e.Text);
+            e.Handled = regex.IsMatch(e.Text) && e.Text != ".";
         }
     }
 }

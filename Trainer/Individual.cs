@@ -61,14 +61,17 @@ namespace Trainer
 
         public void CalculateFitness()
         {
-            // Old fitness function
-            //fitness = Math.Log10(average_age) + average_score * average_score;
+            // Fitness function 1
+            fitness = Math.Log10(average_age) + average_score * 2.0;
 
-            // New fitness function
-            if (snake.Body.Count < 10)
-                fitness = average_age * average_age * Math.Pow(2, snake.Body.Count);
-            else
-                fitness = average_age * average_age * Math.Pow(2, 10) * (snake.Body.Count - 9);
+            // Fitness function 2
+            fitness = average_score * average_score;
+
+            // Fitness function 3
+            //if (snake.Body.Count < 10)
+            //    fitness = average_age * average_age * Math.Pow(2, snake.Body.Count);
+            //else
+            //    fitness = average_age * average_age * Math.Pow(2, 10) * (snake.Body.Count - 9);
         }
 
         private void Update()

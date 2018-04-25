@@ -21,6 +21,7 @@ namespace Trainer
     {
         private Random rnd = new Random((int)DateTime.Now.Ticks);
         private LineSeries fitness_series;
+        private LineSeries score_series;
         private IProgress<int> progress;
         private CancellationTokenSource cts;
         private List<Individual> population;
@@ -104,7 +105,9 @@ namespace Trainer
 
             Model = new PlotModel { Title = "Statistics" };
             fitness_series = new LineSeries { Title = "Fitness" };
+            score_series = new LineSeries { Title = "Score" };
             Model.Series.Add(fitness_series);
+            Model.Series.Add(score_series);
 
             progress = new Progress<int>(i => 
             {
@@ -138,6 +141,8 @@ namespace Trainer
 
             fitness_series.Points.Clear();
             fitness_series.Points.Add(new DataPoint(0, 0));
+            score_series.Points.Clear();
+            score_series.Points.Add(new DataPoint(0, 0));
             Model.InvalidatePlot(true);
 
             population = Enumerable.Range(0, PopulationSize).Select(_ => new Individual()).ToList();
@@ -194,6 +199,8 @@ namespace Trainer
             
             for (int i = 1; i < sim.FitnessStatistics.Count; i++)
                 fitness_series.Points.Add(new DataPoint(i, sim.FitnessStatistics[i]));
+            for (int i = 1; i < sim.ScoreStatistics.Count; i++)
+                score_series.Points.Add(new DataPoint(i, sim.ScoreStatistics[i]));
             Model.InvalidatePlot(true);
 
             population = sim.Chromosomes.Select(chromosome => new Individual { Chromosome = chromosome }).ToList();
@@ -230,6 +237,7 @@ namespace Trainer
                 Generation = Generation,
                 TotalRuntime = TotalRunTime,
                 FitnessStatistics = fitness_series.Points.Select(p => p.Y).ToList(),
+                ScoreStatistics = score_series.Points.Select(p => p.Y).ToList(),
                 Chromosomes = population.Select(p => p.Chromosome).ToList()
             };
             JsonUtils.WriteToFile(filename, sim);
@@ -334,9 +342,10 @@ namespace Trainer
                         Task.Factory.StartNew(() =>
                         {
                             AddMessage($" * Simulation took {elapsed} ms");
-                            AddMessage($" * Maximum fitness {best.fitness}, Age {best.average_age}, Score {best.average_score}");
+                            AddMessage($" * Maximum fitness {best.fitness:N2}, Age {best.average_age}, Score {best.average_score}");
 
                             fitness_series.Points.Add(new DataPoint(Generation, ordered_population.First().fitness));
+                            score_series.Points.Add(new DataPoint(Generation, ordered_population.First().average_score));
                             Model.InvalidatePlot(true);
 
                             Generation++;
