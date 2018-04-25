@@ -206,7 +206,7 @@ namespace Trainer
             population = sim.Chromosomes.Select(chromosome => new Individual { Chromosome = chromosome }).ToList();
             PopulationSize = population.Count;
 
-            Messages.Add("Loaded " + filename);
+            AddMessage("Loaded " + filename);
         }
 
         private void SaveClick(object sender, RoutedEventArgs e)
@@ -242,7 +242,7 @@ namespace Trainer
             };
             JsonUtils.WriteToFile(filename, sim);
 
-            Messages.Add("Saved " + filename);
+            AddMessage("Saved " + filename);
         }
 
         private void SaveBestClick(object sender, RoutedEventArgs e)
@@ -266,7 +266,7 @@ namespace Trainer
                 var best = population.OrderByDescending(i => i.fitness).First();
                 JsonUtils.WriteToFile(sfd.FileName, best.Chromosome);
 
-                Messages.Add("Saved " + sfd.FileName);
+                AddMessage("Saved " + sfd.FileName);
             }
         }
 
