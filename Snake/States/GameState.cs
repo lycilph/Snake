@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using System;
 using System.Linq;
 
@@ -14,6 +15,7 @@ namespace LyCilph.States
         private Texture2D point;
         private Texture2D circle;
         private SpriteFont font;
+        private Song chomp;
 
         private UpdateManager update_manager;
 
@@ -59,6 +61,7 @@ namespace LyCilph.States
         {
             circle = content.Load<Texture2D>("circle");
             font = content.Load<SpriteFont>("font");
+            chomp = content.Load<Song>("chomp");
         }
 
         public override void HandleInput(InputManager input)
@@ -97,6 +100,7 @@ namespace LyCilph.States
             // Did the snake eat the food?
             if (food.Hit(snake.Head))
             {
+                MediaPlayer.Play(chomp);
                 snake.HasEaten = true;
                 CreateFood();
             }
