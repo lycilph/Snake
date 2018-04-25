@@ -1,11 +1,15 @@
 ﻿using LyCilph.Elements;
+using LyCilph.Utils;
+using Microsoft.Win32;
 using OxyPlot;
 using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -21,6 +25,7 @@ namespace Trainer
         private CancellationTokenSource cts;
         private List<Individual> population;
         private DispatcherTimer timer;
+        private string filename;
 
         public PlotModel Model
         {
@@ -156,13 +161,104 @@ namespace Trainer
                 SimulationRuns = create_dialog.SimulationRuns;
                 PercentToKeep = create_dialog.PercentToKeep;
                 MutationRate = create_dialog.MutationRate;
+                filename = string.Empty;
                 Reset();
             }
         }
 
         private void LoadClick(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show(this, "Not implemented yet", "Information");
+            var sfd = new OpenFileDialog
+            {
+                DefaultExt = ".pop",
+                Filter = "Population file (.pop)|*.pop",
+                InitialDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+            };
+
+            if (sfd.ShowDialog() == true)
+            {
+                filename = sfd.FileName;
+            }
+
+            if (string.IsNullOrWhiteSpace(filename))
+                return;
+
+            var sim = JsonUtils.ReadFromFile<SerializedSimulation>(filename);
+            Reset();
+
+            SimulationRuns = sim.SimulationRuns;
+            PercentToKeep = sim.PercentToKeep;
+            MutationRate = sim.MutationRate;
+            Generation = sim.Generation;
+            TotalRunTime = sim.TotalRuntime;
+            
+            for (int i = 1; i < sim.FitnessStatistics.Count; i++)
+                fitness_series.Points.Add(new DataPoint(i, sim.FitnessStatistics[i]));
+            Model.InvalidatePlot(true);
+
+            population = sim.Population;
+
+            Messages.Add("Loaded " + filename);
+        }
+
+        private void SaveClick(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(filename))
+            {
+                var sfd = new SaveFileDialog
+                {
+                    DefaultExt = ".pop",
+                    Filter = "Population file (.pop)|*.pop",
+                    InitialDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+            };
+
+                if (sfd.ShowDialog() == true)
+                {
+                    filename = sfd.FileName;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(filename))
+                return;
+
+            var sim = new SerializedSimulation
+            {
+                SimulationRuns = SimulationRuns,
+                PercentToKeep = PercentToKeep,
+                MutationRate = MutationRate,
+                Generation = Generation,
+                TotalRuntime = TotalRunTime,
+                FitnessStatistics = fitness_series.Points.Select(p => p.Y).ToList(),
+                Population = population
+            };
+            JsonUtils.WriteToFile(filename, sim);
+
+            Messages.Add("Saved " + filename);
+        }
+
+        private void SaveBestClick(object sender, RoutedEventArgs e)
+        {
+            var dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (!string.IsNullOrWhiteSpace(filename))
+            {
+                dir = Path.GetDirectoryName(filename);
+            }
+
+            var sfd = new SaveFileDialog
+            {
+                FileName = Path.GetFileNameWithoutExtension(filename),
+                DefaultExt = ".snake",
+                Filter = "Snake file (.snake)|*.snake",
+                InitialDirectory = dir
+            };
+
+            if (sfd.ShowDialog() == true)
+            {
+                var best = population.OrderByDescending(i => i.fitness).First();
+                JsonUtils.WriteToFile(sfd.FileName, best.Chromosome);
+
+                Messages.Add("Saved " + sfd.FileName);
+            }
         }
 
         private void StartClick(object sender, RoutedEventArgs e)
